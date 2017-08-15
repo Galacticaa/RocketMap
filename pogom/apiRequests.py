@@ -5,6 +5,7 @@ import logging
 
 from pgoapi.utilities import get_cell_ids
 from pgoapi.hash_server import BadHashRequestException, HashingOfflineException
+from pgoapi.protos.pogoprotos.inventory.item.item_id_pb2 import *
 
 log = logging.getLogger(__name__)
 
@@ -100,8 +101,12 @@ def parse_inventory(account, api_response):
         if item_data.HasField('player_stats'):
             stats = item_data.player_stats
             account['level'] = stats.level
+            account['xp'] = stats.experience
+            account['encounters'] = stats.pokemons_encountered
+            account['captures'] = stats.pokemons_captured
             account['spins'] = stats.poke_stop_visits
             account['walked'] = stats.km_walked
+            account['hatched'] = stats.eggs_hatched
 
             log.debug('Parsed %s player stats: level %d, %f km ' +
                       'walked, %d spins.', account['username'],
@@ -148,6 +153,14 @@ def parse_inventory(account, api_response):
                     'km_target': p_data.egg_km_walked_target
                 })
                 parsed_eggs += 1
+
+    balls = account['items'].get(ITEM_POKE_BALL, 0) + account['items'].get(
+            ITEM_GREAT_BALL, 0) + account['items'].get(ITEM_ULTRA_BALL, 0)
+    items = reduce(lambda x, value: x + value, account['items'].itervalues(), 0)
+
+    account['total_balls'] = balls
+    account['total_items'] = items
+
     log.debug(
         'Parsed %s player inventory: %d items, %d pokemons, %d available' +
         ' eggs and %d available incubators.', account['username'],

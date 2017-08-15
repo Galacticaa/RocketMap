@@ -532,9 +532,11 @@ def spin_pokestop(api, account, args, fort, step_location):
 
 def parse_get_player(account, api_response):
     if 'GET_PLAYER' in api_response['responses']:
-        player_data = api_response['responses']['GET_PLAYER'].player_data
+        player_resp = api_response['responses']['GET_PLAYER']
+        player_data = player_resp.player_data
 
-        account['warning'] = api_response['responses']['GET_PLAYER'].warn
+        account['banflag'] = player_resp.banned
+        account['warning'] = player_resp.warn
         account['tutorials'] = player_data.tutorial_state
         account['buddy'] = player_data.buddy_pokemon.id
 

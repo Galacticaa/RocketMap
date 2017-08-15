@@ -86,7 +86,9 @@ def switch_status_printer(display_type, current_page, mainlog,
         elif command.isdigit():
             current_page[0] = int(command)
             mainlog.handlers[0].setLevel(logging.CRITICAL)
-            display_type[0] = 'workers'
+        elif command.lower() == 'a':
+            mainlog.handlers[0].setLevel(logging.CRITICAL)
+            display_type[0] = 'account_stats'
         elif command.lower() == 'f':
             mainlog.handlers[0].setLevel(logging.CRITICAL)
             display_type[0] = 'failedaccounts'
@@ -96,8 +98,8 @@ def switch_status_printer(display_type, current_page, mainlog,
 
 
 # Thread to print out the status of each worker.
-def status_printer(threadStatus, account_failures, logmode, hash_key,
-                   key_scheduler):
+def status_printer(threadStatus, account_queue, account_failures,
+                   account_captchas, logmode, hash_key, key_scheduler):
 
     if (logmode == 'logs'):
         display_type = ['logs']
@@ -206,6 +208,13 @@ def status_printer(threadStatus, account_failures, logmode, hash_key,
                         threadStatus[item]['captcha'],
                         threadStatus[item]['message']))
 
+        elif display_type[0] == 'account_stats':
+            total_pages = print_account_stats(status_text, threadStatus,
+                                              account_queue,
+                                              account_captchas,
+                                              account_failures,
+                                              current_page)
+
         elif display_type[0] == 'failedaccounts':
             status_text.append('-----------------------------------------')
             status_text.append('Accounts on hold:')
@@ -253,13 +262,122 @@ def status_printer(threadStatus, account_failures, logmode, hash_key,
         # Print the status_text for the current screen.
         status_text.append((
             'Page {}/{}. Page number to switch pages. F to show on hold ' +
-            'accounts. H to show hash status. <ENTER> alone to switch ' +
-            'between status and log view').format(current_page[0],
-                                                  total_pages))
+            'accounts. H to show hash status. A to show account stats. '
+            '<ENTER> alone to switch between status and log view')
+                           .format(current_page[0], total_pages))
         # Clear the screen.
         os.system('cls' if os.name == 'nt' else 'clear')
         # Print status.
         print '\n'.join(status_text)
+
+
+# Print statistics about accounts
+def print_account_stats(rows, thread_status, account_queue,
+                        account_captchas, account_failures,
+                        current_page):
+    rows.append('-----------------------------------------')
+    rows.append('Account statistics:')
+    rows.append('-----------------------------------------')
+
+    # Collect all accounts.
+    accounts = []
+    for item in thread_status:
+        if thread_status[item]['type'] == 'Worker':
+            worker = thread_status[item]
+            account = worker.get('account', {})
+            accounts.append(('active', account))
+    for account in list(account_queue.queue):
+        accounts.append(('spare', account))
+    for captcha_tuple in list(account_captchas):
+        account = captcha_tuple[1]
+        accounts.append(('captcha', account))
+    for acc_fail in account_failures:
+        account = acc_fail['account']
+        accounts.append(('failed', account))
+
+    # Determine maximum username length.
+    userlen = 4
+    for status, acc in accounts:
+        userlen = max(userlen, len(acc.get('username', '')))
+
+    # Print table header.
+    row_tmpl = '{:7} | {:' + str(userlen) + '} | {:4} | {:3} | {:5} | {:>8} | {:10}' \
+                                            ' | {:8} | {:9} | {:5} | {:>10} | {:7}'
+    rows.append(row_tmpl.format('Status', 'User', 'Warn', 'Ban', 'Level', 'XP',
+                                'Encounters', 'Captures', 'Inventory', 'Spins',
+                                'Walked', 'Hatched'))
+
+    # Pagination.
+    start_line, end_line, total_pages = calc_pagination(len(accounts), 6,
+                                                        current_page)
+
+    # Print account statistics.
+    current_line = 0
+    for status, account in accounts:
+        # Skip over items that don't belong on this page.
+        current_line += 1
+        if current_line < start_line:
+            continue
+        if current_line > end_line:
+            break
+
+        banned = account.get('banflag', None)
+        warning = account.get('warning', None)
+
+        # Format walked km
+        km_walked_f = account.get('walked', 'none')
+        if km_walked_f != 'none':
+            km_walked_str = '{:.1f} km'.format(km_walked_f)
+        else:
+            km_walked_str = ""
+
+        # Inventory
+        inv_str = ''
+        items = account.get('items', {})
+        if items:
+            inv_str = '{}B/{}T'.format(account.get('total_balls', 0),
+                                       account.get('total_items', 0))
+
+        rows.append(row_tmpl.format(
+            status,
+            account.get('username', ''),
+            '' if warning is None else ('Yes' if warning else 'No'),
+            '' if banned is None else ('Yes' if banned else 'No'),
+            account.get('level', ''),
+            account.get('xp', ''),
+            account.get('encounters', ''),
+            account.get('captures', ''),
+            inv_str,
+            account.get('spins', ''),
+            km_walked_str,
+            account.get('hatched', '')
+        ))
+
+    return total_pages
+
+# Helper function to calculate start and end line for paginated output
+def calc_pagination(total_rows, non_data_rows, current_page):
+    width, height = terminalsize.get_terminal_size()
+    # Title and table header is not usable space
+    usable_height = height - non_data_rows
+    # Prevent people running terminals only 6 lines high from getting a
+    # divide by zero.
+    if usable_height < 1:
+        usable_height = 1
+
+    total_pages = math.ceil(total_rows / float(usable_height))
+
+    # Prevent moving outside the valid range of pages.
+    if current_page[0] > total_pages:
+        current_page[0] = total_pages
+    if current_page[0] < 1:
+        current_page[0] = 1
+
+    # Calculate which lines to print (1-based).
+    start_line = usable_height * (current_page[0] - 1) + 1
+    end_line = start_line + usable_height - 1
+
+    return start_line, end_line, total_pages
 
 
 # The account recycler monitors failed accounts and places them back in the
@@ -395,8 +513,9 @@ def search_overseer_thread(args, new_location_queue, control_flags, heartb,
         t = Thread(
             target=status_printer,
             name='status_printer',
-            args=(threadStatus, account_failures, args.print_status,
-                  args.hash_key, key_scheduler))
+            args=(threadStatus, account_queue, account_failures,
+                  account_captchas, args.print_status, args.hash_key,
+                  key_scheduler))
         t.daemon = True
         t.start()
 
@@ -796,6 +915,7 @@ def search_worker_thread(args, account_queue, account_sets, account_failures,
                 status.update(prevStatus)
             else:
                 status.update({
+                    'account': account,
                     'username': account['username'],
                     'last_modified': datetime.utcnow(),
                     'last_scan_date': datetime.utcnow(),
