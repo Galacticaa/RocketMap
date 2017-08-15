@@ -326,6 +326,11 @@
       &.container {
         display: grid;
         justify-content: center;
+
+        .gym {
+            font-size: 10px;
+            line-height: 1.1;
+        }
       }
 
       &.name {
@@ -335,7 +340,6 @@
         }
         font-size: 16px;
         font-weight: 900;
-        margin-bottom: -5px;
         text-decoration: underline;
       }
 
@@ -434,6 +438,10 @@
       }
       margin-bottom: 5px;
 
+      &[class="raid"] {
+        margin-bottom: 0;
+      }
+
       &.container {
         display: flex;
         justify-content: center;
@@ -483,6 +491,8 @@
             font-size: 9px !important;
           }
           font-size: 14px;
+          font-weight: normal;
+          line-height: 1.5;
           float: left;
           clear: left;
           margin: 0px 5px 5px 10px
@@ -497,6 +507,7 @@
           }
           margin: 0px 0px 5px 0px;
           font-size: 10px;
+          line-height: 2;
           padding: 0px 5px;
           border-radius: 4px;
           color: white;

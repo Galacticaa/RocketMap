@@ -685,7 +685,7 @@ function gymLabel(gym, includeMembers = true) {
                 ${levelStr}
                 </span>
             </div>
-            <span class='raid countdown'>${getTimeStr(raid.start)} - ${getTimeStr(raid.end)}</span> (${getTimeStr(raid.end)})
+            <span class='raid countdown'>${getTimeStr(raid.start)} - ${getTimeStr(raid.end)}</span>
         `
 
         if (isRaidStarted) {
