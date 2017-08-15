@@ -518,94 +518,63 @@ function pokemonLabel(item) {
         typesDisplay += getTypeSpan(type)
     })
 
-    var details = ''
-
+    var buttonString = ''
     var contentstring = ''
+    var cpString = ''
     var formString = ''
+    var genderString = ''
+    var ivString = ''
+    var moveString = ''
+    var sizeString = ''
 
     if (id === 201 && form !== null && form > 0) {
         formString += `(${unownForm[item['form']]})`
     }
 
-    contentstring += `
-    <div class='pokemon name'>
-      ${name} <span class='pokemon name pokedex'><a href='http://pokemon.gameinfo.io/en/pokemon/${id}' target='_blank' title='View in Pokédex'>#${id}</a></span> ${formString} <span class='pokemon gender rarity'>${genderType[gender - 1]} ${rarityDisplay}</span> ${typesDisplay}
-    </div>`
+    if (gender !== null) {
+        var genderClass = gender === 1 ? 'male' : (gender === 2 ? 'female' : '')
+        genderString = `<span class="pokemon gender ${genderClass}">${genderType[gender - 1]}</span>`
+    }
 
     if (cp !== null && cpMultiplier !== null) {
-        var pokemonLevel = getPokemonLevel(cpMultiplier)
-
         if (atk !== null && def !== null && sta !== null) {
             var iv = getIv(atk, def, sta)
         }
 
-        contentstring += `
-          <div class='pokemon container'>
-            <div class='pokemon container content-left'>
-              <div>
-                <img class='pokemon sprite' src='static/icons/${id}.png'>
-                <span class='pokemon'>Level: </span><span class='pokemon'>${pokemonLevel}</span>
-                <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
-                <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
-                <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
-              </div>
-          </div>
-          <div class='pokemon container content-right'>
-            <div>
-              <div class='pokemon disappear'>
-                <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
-              </div>
-              <div class='pokemon'>
-                CP: <span class='pokemon encounter'>${cp}/${iv.toFixed(1)}%</span> (A${atk}/D${def}/S${sta})
-              </div>
-              <div class='pokemon'>
-                Moveset: <span class='pokemon encounter'>${pMove1}/${pMove2}</span>
-              </div>
-              <div class='pokemon'>
-                Weight: ${weight.toFixed(2)}kg | Height: ${height.toFixed(2)}m
-              </div>
-              <div>
-                <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-              </div>
-          </div>
-        </div>
-      </div>`
-    } else {
-        contentstring += `
-      <div class='pokemon container'>
-        <div class='pokemon container content-left'>
-          <div>
-            <img class='pokemon sprite' src='static/icons/${id}.png'>
-            <span class='pokemon'>Level: </span><span class='pokemon no-encounter'>n/a</span>
-            <span class='pokemon links exclude'><a href='javascript:excludePokemon(${id})'>Exclude</a></span>
-            <span class='pokemon links notify'><a href='javascript:notifyAboutPokemon(${id})'>Notify</a></span>
-            <span class='pokemon links remove'><a href='javascript:removePokemonMarker("${encounterId}")'>Remove</a></span>
-          </div>
-      </div>
-      <div class='pokemon container content-right'>
-        <div>
-          <div class='pokemon disappear'>
-            <span class='label-countdown' disappears-at='${disappearTime}'>00m00s</span> left (${moment(disappearTime).format('HH:mm')})
-          </div>
-          <div class='pokemon'>
-            CP: <span class='pokemon no-encounter'>No information</span>
-          </div>
-          <div class='pokemon'>
-            Moveset: <span class='pokemon no-encounter'>No information</span>
-          </div>
-          <div class='pokemon'>
-            Weight: <span class='pokemon no-encounter'>n/a</span> | Height: <span class='pokemon no-encounter'>n/a</span>
-          </div>
-          <div>
-            <span class='pokemon navigate'><a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'>${latitude.toFixed(6)}, ${longitude.toFixed(7)}</a></span>
-          </div>
-      </div>
-    </div>
-  </div>`
+        cpString = `${cp} CP | `
+        ivString = `<div class='pokemon'>IVs: <span class='pokemon encounter'>${iv.toFixed(1)}% (A${atk}, D${def}, H${sta})</span></div>`
+        moveString = `<div class='pokemon'>Moveset: <span class='pokemon encounter'>${pMove1} | ${pMove2}</span></div>`
+        sizeString = `<div class='pokemon'>Weight: ${weight.toFixed(2)}kg | Height: ${height.toFixed(2)}m</div>`
     }
 
+    buttonString += `<a href='javascript:removePokemonMarker("${encounterId}")' title='Remove this Pokemon'><i class='fa fa-trash-o'></i></a>`
+    buttonString += `<a href='javascript:notifyAboutPokemon(${id})' title='Get notified'><i class='fa fa-bell'></i></a>`
+    buttonString += `<a href='javascript:excludePokemon(${id})' title='Exclude this species'><i class='fa fa-ban'></i></a>`
+    buttonString += `<a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'><i class='fa fa-car'></i></a>`
+
     contentstring += `
-      ${details}`
+    <div class="pokemon container">
+        <div class="pokemon container content-left">
+            <div><img class='pokemon sprite' src='static/icons/${id}.png'></div>
+        </div>
+        <div class="pokemon container content-right">
+            <div>
+                <div class='pokemon name'>
+                    ${name}
+                    ${formString} ${genderString} ${typesDisplay}
+                </div>
+                <div class='pokemon disappear'>
+                    ${cpString}<i class='fa fa-clock-o'></i> <span class='label-countdown' disappears-at='${disappearTime}'>0s</span> left
+                </div>
+                ${ivString}
+                ${moveString}
+                ${sizeString}
+            </div>
+        </div>
+    </div>
+    <div class='pokemon buttons'>
+        <div>${buttonString}</div>
+    </div>`
 
     return contentstring
 }
@@ -782,7 +751,7 @@ function pokestopLabel(expireTime, latitude, longitude) {
                 Lured Pokéstop
               </div>
               <div class='pokestop-expire'>
-                  <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${moment(expireTime).format('HH:mm')})
+                  <span class='label-countdown' disappears-at='${expireTime}'>00m00s</span> left (${getTimeStr(expireTime)})
               </div>
               <div>
                 <img class='pokestop sprite' src='static/images/pokestop//PokestopLured.png'>
@@ -1863,7 +1832,13 @@ var updateLabelDiffTime = function () {
         if (disappearsAt.ttime < disappearsAt.now) {
             timestring = '(expired)'
         } else {
-            timestring = lpad(hours, 2, 0) + ':' + lpad(minutes, 2, 0) + ':' + lpad(seconds, 2, 0)
+            timestring = ''
+            if (hours > 0) {
+                timestring = hours + 'h '
+            }
+
+            timestring += minutes + 'm '
+            timestring += seconds + 's'
         }
 
         $(element).text(timestring)

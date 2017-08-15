@@ -19,22 +19,26 @@
   &.name {
     font-size: 13px;
     font-weight: 900;
-
-    &.pokedex {
-      font-size: 12px;
-    }
   }
 
   &.encounter {
-    font-weight: 900;
-  }
-
-  &.no-encounter {
     font-weight: 300;
   }
 
-  &.gender.rarity {
-    font-size: 11px;
+  &.gender {
+    color: #aaa;
+    font-size: 1.9em;
+    line-height: 0;
+    position: relative;
+    top: 3px;
+
+    &.male {
+        color: #6890f0;
+    }
+
+    &.female {
+        color: #e898e8;
+    }
   }
 
   &.disappear {
@@ -42,37 +46,12 @@
     font-weight: 900;
     margin: 10px 0px 10px 0px;
 
-    &:before {
+    .countdown:before {
       content: '\f017';
       display: inline-block;
       font-family: FontAwesome;
       height: 16px;
       width: 16px;
-      -webkit-font-smoothing: antialiased;
-    }
-  }
-
-  &.links {
-    color: rgb(93,109,126);
-
-    &.exclude:before {
-      content: '\f056';
-      font-family: FontAwesome;
-      margin-right: 3px;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    &.notify:before {
-      content: '\f055';
-      font-family: FontAwesome;
-      margin-right: 3px;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    &.remove:before {
-      content: '\f057';
-      font-family: FontAwesome;
-      margin-right: 3px;
       -webkit-font-smoothing: antialiased;
     }
   }
@@ -95,5 +74,24 @@
     display: block;
     height: 48px;
     width: 48px;
+  }
+}
+
+.pokemon.buttons {
+  border-top: 1px solid #aaa;
+  padding: 8px 0 0;
+  font-size: 1.5em;
+  text-align: center;
+
+  a{
+    color: #333;
+
+    &:hover {
+      color: rgb(93,109,126);
+    }
+
+    i {
+      padding: 4px;
+    }
   }
 }
