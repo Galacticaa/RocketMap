@@ -537,6 +537,7 @@ def parse_get_player(account, api_response):
 
         account['banflag'] = player_resp.banned
         account['warning'] = player_resp.warn
+        account['rareless_scans'] = 0
         account['tutorials'] = player_data.tutorial_state
         account['buddy'] = player_data.buddy_pokemon.id
 

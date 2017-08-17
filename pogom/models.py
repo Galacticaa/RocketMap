@@ -34,6 +34,7 @@ from .customLog import printPokemon
 
 from .account import check_login, setup_api, pokestop_spinnable, spin_pokestop
 from .proxy import get_new_proxy
+from .shadow import update_rareless_scans
 from .apiRequests import encounter
 
 log = logging.getLogger(__name__)
@@ -1897,6 +1898,10 @@ def parse_map(args, map_dict, scan_coords, scan_location, db_update_queue,
     now_secs = date_secs(now_date)
 
     del map_dict['responses']['GET_MAP_OBJECTS']
+
+    # Check response for rares to detect and track shadow bans
+    if (wild_pokemon or nearby_pokemon) and config['parse_pokemon']:
+        update_rareless_scans(cells, account, log)
 
     # If there are no wild or nearby Pokemon...
     if not wild_pokemon and not nearby_pokemon:

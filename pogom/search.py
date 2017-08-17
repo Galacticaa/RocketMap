@@ -48,6 +48,7 @@ from .transform import get_new_coords
 from .account import setup_api, check_login, AccountSet
 from .captcha import captcha_overseer_thread, handle_captcha
 from .proxy import get_new_proxy
+from .shadow import format_rareless_scans
 from .apiRequests import gym_get_info, get_map_objects as gmo
 from .transform import jitter_location
 
@@ -301,10 +302,11 @@ def print_account_stats(rows, thread_status, account_queue,
         userlen = max(userlen, len(acc.get('username', '')))
 
     # Print table header.
-    row_tmpl = '{:7} | {:' + str(userlen) + '} | {:4} | {:3} | {:5} | {:>8} | {:10}' \
-                                            ' | {:8} | {:9} | {:5} | {:>10} | {:7}'
-    rows.append(row_tmpl.format('Status', 'User', 'Warn', 'Ban', 'Level', 'XP',
-                                'Encounters', 'Captures', 'Inventory', 'Spins',
+    row_tmpl = '{:7} | {:' + str(userlen) + '} | {:4} | {:3} | {:11} | {:5} ' \
+                                            '| {:>8} | {:10} | {:8} | {:9} ' \
+                                            '| {:5} | {:>10} | {:7}'
+    rows.append(row_tmpl.format('Status', 'User', 'Warn', 'Ban', 'Blind',  'Level',
+                                'XP', 'Encounters', 'Captures', 'Inventory', 'Spins',
                                 'Walked', 'Hatched'))
 
     # Pagination.
@@ -343,6 +345,7 @@ def print_account_stats(rows, thread_status, account_queue,
             account.get('username', ''),
             '' if warning is None else ('Yes' if warning else 'No'),
             '' if banned is None else ('Yes' if banned else 'No'),
+            format_rareless_scans(account),
             account.get('level', ''),
             account.get('xp', ''),
             account.get('encounters', ''),
