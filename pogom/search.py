@@ -129,6 +129,7 @@ def status_printer(threadStatus, account_queue, account_failures,
         # Create a list to hold all the status lines, so they can be printed
         # all at once to reduce flicker.
         status_text = []
+        total_pages = 0
 
         if display_type[0] == 'workers':
 
