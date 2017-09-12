@@ -34,6 +34,7 @@ var excludedPokemon = []
 var notifiedPokemon = []
 var notifiedRarity = []
 var notifiedMinPerfection = null
+var toggledPokemon = 0
 
 var buffer = []
 var reincludedPokemon = []
@@ -492,6 +493,17 @@ function getTimeStr(t) {
     return t ? moment(t).format('HH:mm') : 'unknown'
 }
 
+function togglePokemon(pokemonId) {
+    toggledPokemon = toggledPokemon === 0 ? pokemonId : 0
+
+    if (toggledPokemon === 0) {
+        lastpokemon = false
+        updateMap()
+    } else {
+        clearStaleMarkers()
+    }
+}
+
 function pokemonLabel(item) {
     var name = item['pokemon_name']
     var rarityDisplay = item['pokemon_rarity'] ? '(' + item['pokemon_rarity'] + ')' : ''
@@ -551,6 +563,7 @@ function pokemonLabel(item) {
     buttonString += `<a href='javascript:notifyAboutPokemon(${id})' title='Get notified'><i class='fa fa-bell'></i></a>`
     buttonString += `<a href='javascript:excludePokemon(${id})' title='Exclude this species'><i class='fa fa-ban'></i></a>`
     buttonString += `<a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'><i class='fa fa-car'></i></a>`
+    buttonString += `<a href='javascript:void(0);' onclick='javascript:togglePokemon("${id}");' title='Show/hide other Pokemon'><i class='fa fa-binoculars'></i></a>`
 
     contentstring += `
     <div class="pokemon container">
@@ -1280,8 +1293,9 @@ function clearStaleMarkers() {
     $.each(mapData.pokemons, function (key, value) {
         const isPokeExpired = mapData.pokemons[key]['disappear_time'] < Date.now()
         const isPokeExcluded = excludedPokemon.indexOf(mapData.pokemons[key]['pokemon_id']) !== -1
+        const isPokeToggled = toggledPokemon !== 0 && mapData.pokemons[key]['pokemon_id'] != toggledPokemon
 
-        if (isPokeExpired || isPokeExcluded) {
+        if (isPokeExpired || isPokeExcluded || isPokeToggled) {
             const oldMarker = mapData.pokemons[key].marker
 
             if (oldMarker.rangeCircle) {
@@ -1521,12 +1535,13 @@ function processPokemonChunked(pokemon, chunkSize) {
 function processPokemon(item) {
     const isExcludedPoke = excludedPokemon.indexOf(item['pokemon_id']) !== -1
     const isPokeAlive = item['disappear_time'] > Date.now()
+    const isPokeToggled = toggledPokemon !== 0 && item['pokemon_id'] != toggledPokemon
 
     var oldMarker = null
     var newMarker = null
 
     if (!(item['encounter_id'] in mapData.pokemons) &&
-         !isExcludedPoke && isPokeAlive) {
+         !isExcludedPoke && isPokeAlive && !isPokeToggled) {
         // Add marker to map and item to dict.
         if (!item.hidden) {
             const isBounceDisabled = Store.get('isBounceDisabled')
