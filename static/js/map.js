@@ -564,6 +564,7 @@ function pokemonLabel(item) {
     buttonString += `<a href='javascript:excludePokemon(${id})' title='Exclude this species'><i class='fa fa-ban'></i></a>`
     buttonString += `<a href='javascript:void(0);' onclick='javascript:openMapDirections(${latitude},${longitude});' title='Open in Google Maps'><i class='fa fa-car'></i></a>`
     buttonString += `<a href='javascript:void(0);' onclick='javascript:togglePokemon("${id}");' title='Show/hide other Pokemon'><i class='fa fa-binoculars'></i></a>`
+    buttonString += `<a href='/stats#overlay_${id}' title='Open Nest Locator' target='_blank'><i class='fa fa-globe'></i></a>`
 
     contentstring += `
     <div class="pokemon container">
