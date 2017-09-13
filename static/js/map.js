@@ -1863,26 +1863,21 @@ function getPointDistance(pointA, pointB) {
 }
 
 function sendNotification(title, text, icon, lat, lng) {
-    if (!('Notification' in window)) {
-        return false // Notifications are not present in browser
-    }
+    Push.create(title, {
+        body: text,
+        icon: icon,
+        link: location.pathname == '/' ? '' : location.pathname.substr(1),
+        onClick: function () {
+            if (typeof(window) === 'undefined') {
+                return
+            }
 
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission()
-    } else {
-        var notification = new Notification(title, {
-            icon: icon,
-            body: text,
-            sound: 'sounds/ding.mp3'
-        })
-
-        notification.onclick = function () {
             window.focus()
-            notification.close()
+            this.close()
 
             centerMap(lat, lng, 20)
         }
-    }
+    })
 }
 
 function createMyLocationButton() {
@@ -2231,13 +2226,13 @@ function getParameterByName(name, url) {
 //
 
 $(function () {
-    if (!Notification) {
+    if (!Push.supported()) {
         console.log('could not load notifications')
         return
     }
 
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission()
+    if (!Push.Permission.has()) {
+        Push.Permission.request()
     }
 })
 

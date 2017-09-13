@@ -64,9 +64,13 @@ class Pogom(Flask):
         self.route("/submit_token", methods=['POST'])(self.submit_token)
         self.route("/get_stats", methods=['GET'])(self.get_account_stats)
         self.route("/robots.txt", methods=['GET'])(self.render_robots_txt)
+        self.route("/serviceWorker.min.js", methods=['GET'])(self.render_service_worker)
 
     def render_robots_txt(self):
         return render_template('robots.txt')
+
+    def render_service_worker(self):
+        return self.send_static_file('js/vendor/push.sw.min.js')
 
     def get_bookmarklet(self):
         args = get_args()
