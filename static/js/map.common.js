@@ -991,7 +991,7 @@ var StoreOptions = {
         type: StoreTypes.JSON
     },
     'searchMarkerStyle': {
-        default: 'pokesition',
+        default: showConfig.scan_display ? 'pokesition' : 'hidden',
         type: StoreTypes.String
     },
     'locationMarkerStyle': {

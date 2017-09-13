@@ -352,6 +352,10 @@ function updateSearchMarker(style) {
 }
 
 function createSearchMarker() {
+    if (!showConfig.scan_display) {
+        return
+    }
+
     var searchMarker = new google.maps.Marker({ // need to keep reference.
         position: {
             lat: centerLat,
@@ -2473,7 +2477,9 @@ $(function () {
         updateMap()
     })
 
-    $selectSearchIconMarker = $('#iconmarker-style')
+    if (showConfig.scan_display) {
+        $selectSearchIconMarker = $('#iconmarker-style')
+    }
     $selectLocationIconMarker = $('#locationmarker-style')
 
     $.getJSON('static/dist/data/searchmarkerstyle.min.json').done(function (data) {
@@ -2487,21 +2493,23 @@ $(function () {
             })
         })
 
-        $selectSearchIconMarker.select2({
-            placeholder: 'Select Icon Marker',
-            data: searchMarkerStyleList,
-            minimumResultsForSearch: Infinity
-        })
+        if (showConfig.scan_display) {
+            $selectSearchIconMarker.select2({
+                placeholder: 'Select Icon Marker',
+                data: searchMarkerStyleList,
+                minimumResultsForSearch: Infinity
+            })
 
-        $selectSearchIconMarker.on('change', function (e) {
-            var selectSearchIconMarker = $selectSearchIconMarker.val()
-            Store.set('searchMarkerStyle', selectSearchIconMarker)
-            updateSearchMarker(selectSearchIconMarker)
-        })
+            $selectSearchIconMarker.on('change', function (e) {
+                var selectSearchIconMarker = $selectSearchIconMarker.val()
+                Store.set('searchMarkerStyle', selectSearchIconMarker)
+                updateSearchMarker(selectSearchIconMarker)
+            })
 
-        $selectSearchIconMarker.val(Store.get('searchMarkerStyle')).trigger('change')
+            $selectSearchIconMarker.val(Store.get('searchMarkerStyle')).trigger('change')
 
-        updateSearchMarker(Store.get('lockMarker'))
+            updateSearchMarker(Store.get('lockMarker'))
+        }
 
         $selectLocationIconMarker.select2({
             placeholder: 'Select Location Marker',
