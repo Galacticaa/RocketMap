@@ -78,9 +78,6 @@ function processSeen(seen) {
                             ${moment(pokemonItem.disappear_time).format('H:mm:ss D MMM YYYY')}
                         </td>
                         <td class="status_cell">
-                            ${pokemonItem.latitude.toFixed(7)}, ${pokemonItem.longitude.toFixed(7)}
-                        </td>
-                        <td class="status_cell">
                             <a href="javascript:void(0);" onclick="javascript:showOverlay(${pokemonItem.pokemon_id});">
                                 All Locations
                             </a>
@@ -431,13 +428,7 @@ function appearanceTab(item) {
             times = '<div class="row' + (key % 2) + '">' + saw + '</div>' + times
         })
         return `<div>
-                                <a href="javascript:closeTimes();">Close this tab</a>
-                        </div>
-                        <div class="row1">
-                                <strong>Lat:</strong> ${item['latitude'].toFixed(7)}
-                        </div>
-                        <div class="row0">
-                                <strong>Long:</strong> ${item['longitude'].toFixed(7)}
+                                <a href="javascript:closeTimes();">Close Sidebar</a>
                         </div>
                         <div class="row1">
                             <strong>Appearances:</strong> ${item['count'].toLocaleString()}

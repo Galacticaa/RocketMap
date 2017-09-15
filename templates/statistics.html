@@ -77,7 +77,6 @@
                         <td class="status_cell">Seen</td>
                         <td class="status_cell">Seen (%)</td>
                         <td class="status_cell">Last Seen</td>
-                        <td class="status_cell">Location</td>
                         <td class="status_cell"></td>
                     </tr>
                 </thead>
@@ -107,6 +106,7 @@
     <script>
       var centerLat = {{lat}};
       var centerLng = {{lng}};
+      var showConfig = {{show|tojson|safe}};
     </script>
     <script src="{{ url_for('static', filename='dist/js/map.common.min.js').lstrip('/') }}"></script>
     <!-- Load custom JS before statistics.js so it can change Store defaults. -->

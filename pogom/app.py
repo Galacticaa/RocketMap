@@ -481,9 +481,13 @@ class Pogom(Flask):
 
     def get_stats(self):
         args = get_args()
+
+        scan_display = False if (args.only_server or args.fixed_location or
+                                 args.spawnpoint_scanning) else True
         visibility_flags = {
             'custom_css': args.custom_css,
-            'custom_js': args.custom_js
+            'custom_js': args.custom_js,
+            'scan_display': scan_display
         }
 
         return render_template('statistics.html',
