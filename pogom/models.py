@@ -1900,7 +1900,7 @@ def parse_map(args, map_dict, scan_coords, scan_location, db_update_queue,
     del map_dict['responses']['GET_MAP_OBJECTS']
 
     # Check response for rares to detect and track shadow bans
-    if (wild_pokemon or nearby_pokemon) and config['parse_pokemon']:
+    if (wild_pokemon or nearby_pokemon) and not args.no_pokemon:
         update_rareless_scans(cells, account, log)
 
     # If there are no wild or nearby Pokemon...
